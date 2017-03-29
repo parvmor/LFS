@@ -22,7 +22,7 @@ ddList = variableList[0].find_all('dd')
 for dd,dt in zip(ddList,dtList):
     package = dt.contents[1].contents[0][:-3].lower()
     if package == "time zone data (2016j)":
-        name, version = "time zone data", "2016j"
+        name, version = "tzdata", "2016j"
     else:
         name, version = re.findall(pattern[0],package)[0]
         name = name.lower()
@@ -39,7 +39,6 @@ for dd,dt in zip(ddList,dtList):
         link = dd[idx].contents[1]['href']
     md5sum = dd[idx+1].contents[1].string
     packageDict[(name, version)] = pac(name, version, link, md5sum)
-    print(packageDict[(name, version)])
 
 sections = chapters[5].find_all('li', 'sect1')
 sections = sections[6:-3]
@@ -49,7 +48,16 @@ for section in sections:
     parsedPackageSrc = htmlParser(packageSrc, 'lxml')
     commands = parsedPackageSrc.find_all('kbd', 'command')
     for i in range(len(commands)):
-        commands[i] = commands[i].string
+        if commands[i].string==None:
+            command = commands[i]
+            if commands[i].find_all('em') != []:
+                commands[i] = "\n"
+                continue
+            commands[i] = command.contents[0]
+            commands[i] = commands[i] + command.contents[1].string
+            commands[i] = commands[i] + command.contents[2]
+        else:
+            commands[i] = commands[i].string
     package = section.contents[1].string.lower()
     match = re.findall(pattern[1], package)
     if match == []:
