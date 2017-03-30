@@ -1,6 +1,4 @@
-from urllib.request import urlopen
 from bs4 import BeautifulSoup as htmlParser
-from package import package
 import re
 
 def parse(parsedHtml):
@@ -49,6 +47,10 @@ def parse(parsedHtml):
             else:
                 depName, depVersion = re.findall(pattern, anchor['title'].strip())[0]
             deps.append((depName, depVersion))
+    commands = commandParser(parsedHtml)
+    return (link, md5sum, deps, optDeps, commands)
+
+def commandParser(parsedHtml):
     commands = parsedHtml.find_all('kbd', 'command')
     for i in range(len(commands)):
         if commands[i].string is None:
@@ -62,3 +64,4 @@ def parse(parsedHtml):
             commands[i] = commands[i] + command.contents[2]
         else:
             commands[i] = commands[i].string
+    return commands

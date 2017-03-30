@@ -1,21 +1,9 @@
 from bs4 import BeautifulSoup as htmlParser
 from urllib.request import urlopen
+from package import package
+from parser import *
 import re
-
-from package import package as pac
-"""
-param of pac:
-    name
-    version=None
-    link=None
-    md5sum=None
-    deps=None
-    optDeps=None
-methods:
-    addCommand:
-        param:
-            commands to be added as a list
-"""
+import json
 
 blfs = "http://www.linuxfromscratch.org/blfs/view/stable/"
 
@@ -23,9 +11,8 @@ def security(chapter):
     """
     param:
         chapter : list of sections in security chapter
-
     return:
-        an instance of pac class
+        None
     """
     sections = chapter.find_all('li', 'sect1')[1:]
     for section in sections:
@@ -35,11 +22,21 @@ def security(chapter):
         name = parsedHtml.title.string.strip()
         if name == 'Certificate Authority Certificates' :
             version = 'none'
+            link, md5sum, deps, optDeps, commands = parser(parsedHtml)
+            temp = package(name, version, link, md5sum, deps, optDeps)
+            temp.addCommand(commands)
         elif name == 'Setting Up a Network Firewall':
-            # TODO : add the commands to iptables, 1.6.1
+            commands = commandParser(parsedHtml)
+            packageDict = json.load(open('package.json', 'r'))
+            for command in commands:
+                packageDict['iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + command
+            open('package.json', 'w').write(json.dumps(packageDict, sort_keys=True, indent=4) + '\n')
         else:
             pattern = re.compile('(.*)-(\d[^\s]*)')
             name, version = re.findall(pattern,name)[0]
+            link, md5sum, deps, optDeps, commands = parser(parsedHtml)
+            temp = package(name, version, link, md5sum, deps, optDeps)
+            temp.addCommand(commands)
 
 def main():
     src = urlopen(blfs)
