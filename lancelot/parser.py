@@ -18,9 +18,13 @@ def parser(parsedHtml):
                 continue
         elif linkFlag:
             content = para.contents[0].strip()
-            if re.search('[Dd]ownload.* (([Hh][Tt])|[Ff])[tT][pP]', content) is not None:
+            if re.search('[Dd]ownload.*(((([Hh][Tt])|[Ff])[tT][pP])|(x86.*))', content) is not None:
                 link = para.a['href']
                 linkFlag = 0
+        for lines in str(para).split('\n'):
+            if re.search('[Mm][Dd]5 [Ss][uU][Mm]', lines) is not None:
+                md5sum = re.findall(':(.*)', lines)[0].strip()
+
     if re.search(re.compile('[Aa]dditional\s+[Dd]ownload'), str(parsedHtml)) is not None:
         additionals = itemizedList[1].find_all('a', 'ulink')
         for additional in additionals:
@@ -61,8 +65,9 @@ def commandParser(parsedHtml):
                 commands[i] ='\n'
                 continue
             commands[i] = command.contents[0]
-            commands[i] = commands[i] + command.contents[1].string
-            commands[i] = commands[i] + command.contents[2]
+            commands[i] = commands[i] + '\n' + command.contents[1].string
+            if 3 == len(command.contents):
+                commands[i] = commands[i] + '\n' + command.contents[2]
         else:
             commands[i] = commands[i].string
     return commands

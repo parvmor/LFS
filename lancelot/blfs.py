@@ -6,35 +6,37 @@ import re
 import json
 
 blfs = "http://www.linuxfromscratch.org/blfs/view/stable/"
+pattern = re.compile('(.*)-(\d[^\s]*)')
 
-def security(chapter):
+def general(chapter):
     """
     param:
-        chapter : list of sections in security chapter
+        chapter: bs4 tag object of chapter
     return:
         None
     """
-    sections = chapter.find_all('li', 'sect1')[1:]
+    sections = chapter.find_all('li', 'sect1')
     for section in sections:
-        link = blfs + section.contents[1]['href']
+        if section.find_all('a') == []:
+            continue
+        print(section)
+        link = blfs + section.a['href']
         src = urlopen(link)
         parsedHtml = htmlParser(src, 'lxml')
         name = parsedHtml.title.string.strip()
-        if name == 'Certificate Authority Certificates' :
+        if re.search('[xX]org', name) is not None:
+            continue
+        elif name == "Certificate Authority Certificates" :
             version = 'none'
             link, md5sum, deps, optDeps, commands = parser(parsedHtml)
             temp = package(name, version, link, md5sum, deps, optDeps)
             temp.addCommand(commands)
-        elif name == 'Setting Up a Network Firewall':
-            commands = commandParser(parsedHtml)
-            packageDict = json.load(open('package.json', 'r'))
-            for command in commands:
-                packageDict['Iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + '\n' + command
-            open('package.json', 'w').write(json.dumps(packageDict, sort_keys=True, indent=4) + '\n')
+        elif re.search(pattern, name) is None:
+            continue
         else:
-            pattern = re.compile('(.*)-(\d[^\s]*)')
             name, version = re.findall(pattern,name)[0]
-            name = name.lower()
+            if parsedHtml.find_all('div', 'itemizedlist') == []:
+                continue
             link, md5sum, deps, optDeps, commands = parser(parsedHtml)
             temp = package(name, version, link, md5sum, deps, optDeps)
             temp.addCommand(commands)
@@ -43,7 +45,8 @@ def main():
     src = urlopen(blfs)
     parsedHtml = htmlParser(src, 'lxml')
     chapters = parsedHtml.find_all('li', 'chapter')
-    security(chapters[3])
+    for chapter in (chapters[3:53]):
+        general(chapter)
 
 if __name__=='__main__':
     main()
