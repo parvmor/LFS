@@ -29,11 +29,12 @@ def security(chapter):
             commands = commandParser(parsedHtml)
             packageDict = json.load(open('package.json', 'r'))
             for command in commands:
-                packageDict['iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + '\n' + command
+                packageDict['Iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + '\n' + command
             open('package.json', 'w').write(json.dumps(packageDict, sort_keys=True, indent=4) + '\n')
         else:
             pattern = re.compile('(.*)-(\d[^\s]*)')
             name, version = re.findall(pattern,name)[0]
+            name = name.lower()
             link, md5sum, deps, optDeps, commands = parser(parsedHtml)
             temp = package(name, version, link, md5sum, deps, optDeps)
             temp.addCommand(commands)

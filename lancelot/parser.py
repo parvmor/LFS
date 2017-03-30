@@ -1,11 +1,12 @@
 from bs4 import BeautifulSoup as htmlParser
 import re
 
-def parse(parsedHtml):
+def parser(parsedHtml):
     itemizedList = parsedHtml.find_all('div', 'itemizedlist')
     # Download link
     paras = itemizedList[0].find_all('p')
     linkFlag = 1
+    link = ""
     pattern = re.compile('(.*)-(\d[^\s]*)')
     for para in paras:
         anchors = para.find_all('a')
@@ -15,12 +16,12 @@ def parse(parsedHtml):
                 md5sum = re.findall(':(.*)', content)[0].strip()
             else:
                 continue
-            elif linkFlag:
-                content = para.contents[0].sttip()
-                if re.search('[Dd]ownload.* (([Hh][Tt])|[Ff])[tT][pP]', content) is not None:
-                    link = para.a['href']
-                    linkFlag = 0
-    if re.search(re.compile('[Aa]dditional\s+[Dd]ownload'), parsedHtml) is not None:
+        elif linkFlag:
+            content = para.contents[0].strip()
+            if re.search('[Dd]ownload.* (([Hh][Tt])|[Ff])[tT][pP]', content) is not None:
+                link = para.a['href']
+                linkFlag = 0
+    if re.search(re.compile('[Aa]dditional\s+[Dd]ownload'), str(parsedHtml)) is not None:
         additionals = itemizedList[1].find_all('a', 'ulink')
         for additional in additionals:
             link += ' , '
