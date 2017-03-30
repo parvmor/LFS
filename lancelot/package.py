@@ -13,7 +13,7 @@ class package:
 
     def addCommand(self, commands):
         for command in commands:
-            self.commands = self.commands + command
+            self.commands = self.commands + '\n' + command
         self.jsonify()
     
     def jsonify(self):

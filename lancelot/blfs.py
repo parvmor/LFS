@@ -29,7 +29,7 @@ def security(chapter):
             commands = commandParser(parsedHtml)
             packageDict = json.load(open('package.json', 'r'))
             for command in commands:
-                packageDict['iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + command
+                packageDict['iptables']['1.6.1']['commands'] = packageDict['iptables']['1.6.1']['commands'] + '\n' + command
             open('package.json', 'w').write(json.dumps(packageDict, sort_keys=True, indent=4) + '\n')
         else:
             pattern = re.compile('(.*)-(\d[^\s]*)')

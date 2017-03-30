@@ -54,7 +54,7 @@ for section in sections:
                 commands[i] = "\n"
                 continue
             commands[i] = command.contents[0]
-            commands[i] = commands[i] + command.contents[1].string
+            commands[i] = '\n' + commands[i] + command.contents[1].string + '\n'
             commands[i] = commands[i] + command.contents[2]
         else:
             commands[i] = commands[i].string
