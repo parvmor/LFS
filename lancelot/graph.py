@@ -4,11 +4,6 @@ import sys
 import os
 import hashlib
 
-if sys.version_info[0]>=3:
-    from urllib.request import urlretrieve
-else:
-    from urllib import urlretrieve
-
 class LanceLot:
 
     def __init__(self):
@@ -63,15 +58,15 @@ class LanceLot:
         data = self.packageDict[name][version]
         links, md5sum = data['link'], data['md5sum']
         flag = 0
+        cwd = os.getcwd()
+        os.chdir("./auxilary")
         for link in links.split(','):
             fileName = link.split("/")[-1]
-            urlretrieve(link,"./auxilary/" + fileName)
+            os.system("curl -O " + link)
             if flag == 0:
                 if md5sum != hashlib.md5(open('./auxilary/' + fileName, 'rb').read()).hexdigest():
                     raise Exception("There was a problem in downloading.")
             flag = 1
-        cwd = os.getcwd()
-        os.chdir("./auxilary")
         os.system("tar -xf " + fileName)
         for item in os.listdir():
             if os.path.isdir(item):
